@@ -1,5 +1,5 @@
 # Ghostwriter AI ✍
-This was a small, over-the-weekend kind of project I did to explore using RNN's with LSTM for automatically generating text character-by-character. The model architecture looks something like this:
+This was a small, over-the-weekend kind of project to explore using RNN's with LSTM for automatically generating text character-by-character. The model architecture looks something like this:
 
 - A number of GRUs stacked on top of one another, doing the heavy lifting in terms of the aforementioned *"RNN with LSTM"*
 - A number of dense, fully-connected layers transferring the output of the GRUs to a vector of probabilities for the next character
@@ -9,7 +9,7 @@ The sampled character's index is then appended to a list, which holds all random
 This is repeated a set number of times to yield the new text.
 
 ## Example results
-The final model, trained on Harry Potter and the Goblet of Fire, is availible in this repo as `textnet_base.pth`. This ended up being capable of producing such striking pieces of writing as the following:
+The final model, trained on Harry Potter and the Goblet of Fire, is available in this repo as `textnet_base.pth`. This ended up being capable of producing such striking pieces of writing as the following:
 
 
 >"You, mentioning your mother," said Hermione. "Nooly!"
