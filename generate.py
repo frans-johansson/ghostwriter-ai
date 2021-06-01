@@ -8,13 +8,23 @@ class TextGenerator:
         self.n_chars = data_set.n_features
         self.p_margin = p_margin
 
-    def generate_sample(self, model, n_output, seed='a', device='cpu'):
+    def generate_sample(self, model, n_output, seed='a', burn_in=200, device='cpu'):
         hn = model.init_hidden().to(device)
         inp = encode_one_hot(seed, self.char_map).to(device)
 
         idxs = torch.empty(n_output).to(dtype=torch.int, device=device)
         idxs[0] = (inp[0, 0, ...] == 1).nonzero().squeeze(0)
 
+        model.eval()
+
+        # Burn in loop to generate warm start for context
+        for _ in range(burn_in):
+            with torch.no_grad():
+                out, hn = model(inp, hn)
+            inp = torch.zeros(1, 1, self.n_chars, device=device)
+
+        # Actual generator loop
+        inp = encode_one_hot(seed, self.char_map).to(device)
         for i in range(n_output-1):
             with torch.no_grad():
                 out, hn = model(inp, hn)
@@ -26,6 +36,8 @@ class TextGenerator:
             inp[..., char] = 1
             idxs[i+1] = (inp[0, 0, ...] == 1).nonzero().squeeze(0)
 
+        model.train()
+
         return decode_indices(idxs, self.char_map)
 
 
@@ -36,4 +48,4 @@ if __name__ == "__main__":
     generator = TextGenerator(text_data)
     model = torch.load('models/textnet_base.pth').to(device)
 
-    print(generator.generate_sample(model, 500, seed='A', device=device))
+    print(generator.generate_sample(model, 500, seed='T', device=device))
