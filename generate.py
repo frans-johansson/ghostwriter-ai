@@ -1,3 +1,4 @@
+import argparse
 import torch
 from data import encode_one_hot, decode_indices, TextFileData
 
@@ -8,7 +9,7 @@ class TextGenerator:
         self.n_chars = data_set.n_features
         self.p_margin = p_margin
 
-    def generate_sample(self, model, n_output, seed='a', burn_in=200, device='cpu'):
+    def generate_sample(self, model, n_output, seed="a", burn_in=100, device="cpu"):
         hn = model.init_hidden().to(device)
         inp = encode_one_hot(seed, self.char_map).to(device)
 
@@ -42,10 +43,18 @@ class TextGenerator:
 
 
 if __name__ == "__main__":
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    parser = argparse.ArgumentParser(
+        description="Generate some new Harry Potter prose")
+    parser.add_argument(
+        "--seed", "-s", default="A", nargs="?", type=str, help="Initial character to start the prose with")
+    parser.add_argument("-n", default=200, nargs="?", type=int,
+                        help="Number of characters to generate")
+    args = parser.parse_args()
 
-    text_data = TextFileData('data/goblet_book.txt')
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    text_data = TextFileData("data/goblet_book.txt")
     generator = TextGenerator(text_data)
-    model = torch.load('models/textnet_base.pth').to(device)
+    model = torch.load("models/textnet_base.pth", map_location=device)
 
-    print(generator.generate_sample(model, 500, seed='T', device=device))
+    print(generator.generate_sample(model, args.n, seed=args.seed, device=device))
